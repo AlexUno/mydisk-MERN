@@ -1,9 +1,19 @@
 import * as dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 dotenv.config();
+import { AuthRouter } from "./routes/auth.routes.js";
+import { UserRouter } from "./routes/user.routes.js";
 
 const app = express();
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors());
+app.use("/api/auth", AuthRouter);
+app.use("/api/user", UserRouter);
+
 const PORT = process.env.PORT ?? 5001;
 
 async function bootstrap() {
