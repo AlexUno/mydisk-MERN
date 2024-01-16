@@ -30,6 +30,11 @@ class TokenService {
     await token.save();
     return token;
   }
+
+  async removeTokenFromDb(refreshToken) {
+    const tokenData = await TokenModel.deleteOne({ refreshToken });
+    return tokenData;
+  }
 }
 
 export const tokenService = new TokenService();

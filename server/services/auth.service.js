@@ -25,6 +25,32 @@ class AuthService {
       ...tokens,
     };
   }
+
+  async login(email, password) {
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      throw HttpError.BadRequest("User with this email address was not found");
+    }
+
+    const isComparePassword = await bcrypt.compare(password, user.password);
+    if (!isComparePassword) {
+      throw HttpError.BadRequest("Invalid password");
+    }
+
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
+
+    return {
+      user: userDto,
+      ...tokens,
+    };
+  }
+
+  async logout(refreshToken) {
+    const token = await tokenService.removeTokenFromDb(refreshToken);
+    return token;
+  }
 }
 
 export const authService = new AuthService();
