@@ -13,23 +13,29 @@ class AuthController {
       });
       return res.json(userData);
     } catch (e) {
-      console.log(e);
+      next(e);
     }
   }
 
   async login(req, res, next) {
     try {
-    } catch (e) {}
+    } catch (e) {
+      next(e);
+    }
   }
 
   async logout(req, res, next) {
     try {
-    } catch (e) {}
+    } catch (e) {
+      next(e);
+    }
   }
 
   async refresh(req, res, next) {
     try {
-    } catch (e) {}
+    } catch (e) {
+      next(e);
+    }
   }
 }
 
