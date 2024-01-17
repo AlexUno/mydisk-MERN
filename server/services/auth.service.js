@@ -5,6 +5,17 @@ import { UserDto } from "../dtos/user.dto.js";
 import { HttpError } from "../exceptions/http.error.js";
 
 class AuthService {
+  async getDataForResponse(user) {
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
+
+    return {
+      user: userDto,
+      ...tokens,
+    };
+  }
+
   async registration(email, password) {
     const candidate = await UserModel.findOne({ email });
 
@@ -16,14 +27,7 @@ class AuthService {
     const user = new UserModel({ email, password: hashPassword });
     await user.save();
 
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateTokens({ ...userDto });
-    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
-
-    return {
-      user: userDto,
-      ...tokens,
-    };
+    return await this.getDataForResponse(user);
   }
 
   async login(email, password) {
@@ -37,14 +41,7 @@ class AuthService {
       throw HttpError.BadRequest("Invalid password");
     }
 
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateTokens({ ...userDto });
-    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
-
-    return {
-      user: userDto,
-      ...tokens,
-    };
+    return await this.getDataForResponse(user);
   }
 
   async logout(refreshToken) {
@@ -65,14 +62,7 @@ class AuthService {
     }
 
     const user = await UserModel.findById(userData.id);
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateTokens({ ...userDto });
-
-    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
-    return {
-      user: userDto,
-      ...tokens,
-    };
+    return await this.getDataForResponse(user);
   }
 }
 
