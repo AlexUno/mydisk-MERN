@@ -51,6 +51,29 @@ class AuthService {
     const token = await tokenService.removeTokenFromDb(refreshToken);
     return token;
   }
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw HttpError.UnauthorizedError();
+    }
+
+    const userData = tokenService.validateRefreshToken(refreshToken);
+    const tokenFromDb = await tokenService.findToken2Db(refreshToken);
+
+    if (!userData || !tokenFromDb) {
+      throw HttpError.UnauthorizedError();
+    }
+
+    const user = await UserModel.findById(userData.id);
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+
+    await tokenService.saveToken2Db(userDto.id, tokens.refreshToken);
+    return {
+      user: userDto,
+      ...tokens,
+    };
+  }
 }
 
 export const authService = new AuthService();
